@@ -3,10 +3,10 @@
 ### :lollipop: 완성 화면
 
 <p align = center>
+<img src = "https://user-images.githubusercontent.com/48902047/163483997-9a07ed56-6348-497c-9521-46c98d3e038f.jpg" width="20%" height="20%">
+<img src = "https://user-images.githubusercontent.com/48902047/163483987-b23ea8c2-f069-4109-a193-847e5a53c9b1.jpg" width="20%" height="20%">
 <img src = "https://user-images.githubusercontent.com/48902047/163483969-226570af-e232-4f1a-a35d-6ec0ec8986a9.jpg" width="20%" height="20%">
 <img src = "https://user-images.githubusercontent.com/48902047/163483977-382c6b2e-0fcf-4a84-b4ca-68ab50224596.jpg" width="20%" height="20%">
-<img src = "https://user-images.githubusercontent.com/48902047/163483987-b23ea8c2-f069-4109-a193-847e5a53c9b1.jpg" width="20%" height="20%">
-<img src = "https://user-images.githubusercontent.com/48902047/163483997-9a07ed56-6348-497c-9521-46c98d3e038f.jpg" width="20%" height="20%"> 
 </p>
 
 ### :lollipop: 명세서
