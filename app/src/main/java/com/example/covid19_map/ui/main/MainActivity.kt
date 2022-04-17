@@ -3,17 +3,15 @@ package com.example.covid19_map.ui.main
 import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
 import android.util.Log
+import androidx.activity.viewModels
 import androidx.annotation.UiThread
 import androidx.core.app.ActivityCompat
-import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.Observer
 import com.example.covid19_map.R
-import com.example.covid19_map.data.local.provideCovidDao
-import com.example.covid19_map.data.remote.response.CenterApi
 import com.example.covid19_map.databinding.ActivityMainBinding
 import com.example.covid19_map.ui.DialogBottomSheetMap
+import com.example.covid19_map.ui.base.BindingActivity
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.naver.maps.geometry.LatLng
@@ -21,41 +19,37 @@ import com.naver.maps.map.*
 import com.naver.maps.map.overlay.Marker
 import com.naver.maps.map.util.FusedLocationSource
 import com.naver.maps.map.util.MarkerIcons
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
-class MainActivity : AppCompatActivity(), OnMapReadyCallback {
-    companion object {
-        private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
-        private const val TAG = "MainActivity"
-    }
 
-    private lateinit var activityMainBinding: ActivityMainBinding
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
+@AndroidEntryPoint
+class MainActivity : BindingActivity<ActivityMainBinding>(R.layout.activity_main),
+    OnMapReadyCallback {
+
+    private val viewModel by viewModels<MainViewModel>()
     private lateinit var locationSource: FusedLocationSource
     private lateinit var naverMap: NaverMap
-    internal val covidDao by lazy { provideCovidDao(application.baseContext) }
-    private lateinit var CenterList: List<CenterApi>
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        activityMainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
+    override fun initView() {
+        attachFragmentmanager()
+    }
 
-
+    fun attachFragmentmanager(){
         val mapFragment = supportFragmentManager.run {
             // 옵션 설정
             val option = NaverMapOptions().mapType(NaverMap.MapType.Basic)
-                    .camera(CameraPosition(LatLng(37.530039, 126.926209), 16.0))
-                    .locationButtonEnabled(false)
+                .camera(CameraPosition(LatLng(37.530039, 126.926209), 16.0))
+                .locationButtonEnabled(false)
             findFragmentById(R.id.map_covid) as MapFragment? ?: MapFragment.newInstance(option)
                 .also {
                     beginTransaction().add(R.id.map_covid, it).commit()
                 }
         }
-        // 프래그먼트(MapFragment)의 getMapAsync() 메서드로 OnMapReadyCallback 을 등록하면 비동기로 NaverMap 객체를 얻을 수 있다고 한다.
-        // NaverMap 객체가 준비되면 OnMapReady() 콜백 메서드 호출
+
         mapFragment.getMapAsync(this)
         locationSource = FusedLocationSource(this, LOCATION_PERMISSION_REQUEST_CODE)
     }
@@ -86,20 +80,17 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(map: NaverMap) {
         map.locationSource = locationSource
         this.naverMap = map.apply {
-            activityMainBinding.btnLocation.map = this
+            binding.btnLocation.map = this
         }
 
-        CoroutineScope(Dispatchers.IO).launch {
-            // DB SELECT
-            CenterList = covidDao.getAll()
+        viewModel.getCenterList()
 
-            // 마커 생성(개수가 많으니까 백그라운드에서)
+        viewModel.CenterList.observe(this, Observer { dbList ->
             val markers = mutableListOf<Marker>()
-            CenterList.forEach {
+            dbList.forEach {
                 markers += Marker().apply {
                     // 마커의 위치 지정
                     position = LatLng(it.lat.toDouble(), it.lng.toDouble())
-
                     // 마커의 정보를 담을 해쉬맵
                     val hashMap = HashMap<String, Any>().apply {
                         put("id", it.id)
@@ -110,7 +101,7 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                         put("updatedAt", it.updatedAt)
                     }
                     // 아이콘 설정
-                    icon = if (it.centerType.contains("중앙/권역")) {
+                    icon = if (it.centerType.contains("중앙")) {
                         MarkerIcons.GREEN.also {
                             hashMap["icon"] = R.drawable.navermap_default_marker_icon_green
                         }
@@ -135,14 +126,14 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                 }
             }
-
-            withContext(Dispatchers.Main) {
-                // 마커 지도 표시(메인 스레드에서)
+            CoroutineScope(Dispatchers.Main).launch {
                 markers.forEach { marker ->
                     marker.map = naverMap
                 }
             }
-        }
+        })
+
+
 
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -181,5 +172,10 @@ class MainActivity : AppCompatActivity(), OnMapReadyCallback {
                     }
                 }
             }
+    }
+
+    companion object {
+        private const val LOCATION_PERMISSION_REQUEST_CODE = 1000
+        private const val TAG = "MainActivity"
     }
 }

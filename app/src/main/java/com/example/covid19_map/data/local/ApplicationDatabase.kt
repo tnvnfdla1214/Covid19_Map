@@ -1,19 +1,12 @@
 package com.example.covid19_map.data.local
 
-import android.content.Context
-import androidx.room.Room
+import androidx.room.Database
+import androidx.room.RoomDatabase
+import com.example.covid19_map.data.local.dao.CovidDao
+import com.example.covid19_map.data.remote.response.CentersModel
 
-private var instance: CovidDatabase? = null
 
-fun provideCovidDao(context: Context): CovidDao = provideDatabase(context).covidDao()
-
-private fun provideDatabase(context: Context): CovidDatabase {
-    if (null == instance) {
-        instance = Room.databaseBuilder(
-            context.applicationContext,
-            CovidDatabase::class.java, "covid.db"
-        ).build()
-    }
-
-    return instance!!
+@Database(entities = [CentersModel::class], version = 1, exportSchema = false)
+abstract class ApplicationDatabase : RoomDatabase() {
+    abstract fun covidDao(): CovidDao
 }
