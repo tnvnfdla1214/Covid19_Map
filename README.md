@@ -9,6 +9,10 @@
 <img src = "https://user-images.githubusercontent.com/48902047/163483977-382c6b2e-0fcf-4a84-b4ca-68ab50224596.jpg" width="20%" height="20%">
 </p>
 
+<p align = center>
+<img src = "https://user-images.githubusercontent.com/48902047/163724418-70144831-f4f7-4327-adfb-e005a3920e2d.png">
+</p>
+
 ### :lollipop: 명세서
 #### 1. 활용 기술
   - Language : Kotlin
