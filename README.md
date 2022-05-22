@@ -48,5 +48,4 @@
 
 <p align = center>
 <img src = "https://user-images.githubusercontent.com/48902047/169705972-894f97a4-6887-45fe-b2f4-fcfc7d2d6776.png"></br>
-이전 코드
 </p>
